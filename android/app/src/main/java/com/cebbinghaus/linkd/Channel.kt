@@ -15,22 +15,14 @@ const val TAG_CHANNEL = "linkd.channel";
 val REQUEST_HISTORY_REQUEST = Main.Requests.forNumber(Main.Requests.REQUEST_HISTORY_REQUEST_VALUE).valueDescriptor.toString();
 val REQUEST_HISTORY_RESPONSE = Main.Requests.forNumber(Main.Requests.REQUEST_HISTORY_RESPONSE_VALUE).valueDescriptor.toString();
 
-var history = Main.History.newBuilder()
-	.setId(0)
-	.setName("Google")
-	.build();
 
-var buf = history.toByteArray();
-
-
-
-class Channel(engine: FlutterEngine) : MethodCallHandler {
+class Channel(engine: FlutterEngine, database: Database) : MethodCallHandler {
 	private val channel = MethodChannel(engine.dartExecutor.binaryMessenger, CHANNEL);
+	private val database = database;
 
 
 	init {
 		channel.setMethodCallHandler(this);
-		Log.i("linkd.channel", "History: " + buf);
 	}
 
 	fun sendMessage(message: String) {
@@ -53,7 +45,13 @@ class Channel(engine: FlutterEngine) : MethodCallHandler {
 		when (method.method) {
 			REQUEST_HISTORY_REQUEST -> {
 				Log.i(TAG_CHANNEL, "getHistory");
-				result.success(buf);
+
+				var historyResponse = Main.HistoryResponse.newBuilder();
+				database.history.getAll().forEach {
+					historyResponse.addHistory(it.toHistory());
+				}
+
+				result.success(historyResponse.build().toByteArray());
 			}
 			else -> {
 				result.notImplemented();

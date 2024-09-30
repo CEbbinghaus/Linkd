@@ -1,10 +1,7 @@
 import 'dart:async';
 
-// import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:linkd/channel.dart';
-import 'package:linkd/proto/main.pb.dart';
 // import 'package:receive_intent/receive_intent.dart' as IntentLib;
 // import 'package:url_launcher/url_launcher.dart';
 // Future<void> ProcessIntent(IntentLib.Intent? intent) async {
@@ -150,7 +147,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
   Future<void> load() async {
     var result = await Channel.history;
-    print(result);
+    setState(() {
+      recieved = result.history.map((element) {
+        return "${element.action} :: ${element.flags.toRadixString(16).padLeft(8, '0')} :: ${element.data}";
+      }).toList();
+    });
   }
 
   @override
@@ -185,16 +186,15 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Text("History:", style: Theme.of(context).textTheme.headlineMedium),
             ...recieved.map((v) => Text(v)),
           ],
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ), // This trailing comma makes auto-formatting nicer for build methods.
+      floatingActionButton: FloatingActionButton(
+        onPressed: load,
+        tooltip: 'Reload',
+        child: const Icon(Icons.refresh),
+      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

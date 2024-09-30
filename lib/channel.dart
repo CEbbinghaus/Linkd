@@ -11,8 +11,8 @@ class Channel {
     return version;
   }
 
-  static Future<History> get history async {
+  static Future<HistoryResponse> get history async {
     final Uint8List history = await channel.invokeMethod(Requests.REQUEST_HISTORY_REQUEST.toString());
-    return History.fromBuffer(history);
+    return HistoryResponse.fromBuffer(history);
   }
 }

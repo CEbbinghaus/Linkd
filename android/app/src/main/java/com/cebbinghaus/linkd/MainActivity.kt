@@ -14,6 +14,7 @@ import io.flutter.plugins.GeneratedPluginRegistrant
 import io.flutter.embedding.engine.FlutterEngine
 import com.cebbinghaus.linkd.BackgroundService
 import android.os.Looper
+import android.net.Uri
 import android.content.ActivityNotFoundException
 import android.content.pm.ResolveInfo
 import com.cebbinghaus.linkd.proto.Main
@@ -21,6 +22,8 @@ import com.cebbinghaus.linkd.proto.Main
 const val TAG_MAIN = "linkd.main"
 
 class MainActivity: FlutterActivity() {
+	var db: Database? = null;
+
 	private fun isServiceRunning(serviceClass: Class<*>): Boolean {
 		val activityManager = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
 		for (process in activityManager.runningAppProcesses) {
@@ -33,12 +36,16 @@ class MainActivity: FlutterActivity() {
 
 	override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
 		super.configureFlutterEngine(flutterEngine);
-		var channel = Channel(flutterEngine);
+		db = Database(this);
+		var channel = Channel(flutterEngine, db!!);
 	}
 
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
+		db = Database(this);
+		
 		Log.i(TAG_MAIN, "onCreate");
+
 		Log.i(TAG_MAIN, "Descriptor: " + Main.Requests.forNumber(Main.Requests.REQUEST_HISTORY_RESPONSE_VALUE).valueDescriptor.toString());
 
 		intent?.let {
@@ -63,8 +70,34 @@ class MainActivity: FlutterActivity() {
 
 	fun handleIntent(intent: Intent) {
 		Log.i(TAG_MAIN, "handleIntent: " + intent);
+
+		if (intent.action == Intent.ACTION_MAIN) {
+			Log.i(TAG_MAIN, "Intent is ACTION_MAIN");
+			return;
+		}
+
+		var value: String? = intent.data?.toString() ?: intent.getStringExtra("query");
 		
-		if(intent.data?.scheme?.startsWith("http") == true) {
+		db!!.history.insert(IntentRecord(intent.action ?: "UNDEFINED", intent.flags, value));
+
+		// We live with this for the sake of autocompletion
+		if (value == null) {
+			Log.i(TAG_MAIN, "Intent value is null");
+			return;
+		}
+
+		Log.i(TAG_MAIN, "Intent value: " + value);
+		intent.data = Uri.parse(value);
+
+		if (value.lowercase().startsWith("fido:")) {
+			Log.i(TAG_MAIN, "Intent is FIDO");
+
+			var browserIntent = Intent(Intent.ACTION_VIEW, intent.data);
+			launchIntent(browserIntent);
+			return;
+		}
+
+		if(value.lowercase().startsWith("http")) {
 			Log.i(TAG_MAIN, "Intent is HTTP");
 
 			var packageName = "org.mozilla.firefox";
@@ -75,57 +108,57 @@ class MainActivity: FlutterActivity() {
 				}
 			}
 			
-			var intent = crateNewIntent(intent, packageName);
-			
-			if (intent == null) {
-				Log.e(TAG_MAIN, "Unable to create new intent");
+			crateNewIntent(intent, packageName)?.let {
+				launchIntent(it);
+			}
+
+		} else {
+			Log.i(TAG_MAIN, "Intent is not HTTP");
+		}
+	}
+
+	fun launchIntent(intent: Intent) {
+		Log.i(TAG_MAIN, "launchIntent: " + intent);
+
+		val pm = getPackageManager();
+
+		// which packages could accept our intent
+		// val resolveInfos: List<ResolveInfo> = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
+
+		// Log.i(TAG_MAIN, "ResolveInfos: " + resolveInfos);
+		// for (resolveInfo in resolveInfos) {
+		// 	Log.i(TAG_MAIN, "ResolveInfo: " + resolveInfo);
+		// }
+
+		val intentResolves = intent.resolveActivity(pm)?.let {
+			Log.i(TAG_MAIN, "Activity resolved " + it);
+
+			if (it.packageName == "com.cebbinghaus.linkd") {
+				Log.w(TAG_MAIN, "Cyclical intent detected. Ignoring.");
 				return;
 			}
+			intent.component = it;
+			true
+		} ?: false;
 
-			
-			Log.i(TAG_MAIN, "new intent: " + intent);
+		if (!intentResolves) {
+			Log.e(TAG_MAIN, "Unable to resolve the activity for the intent, Launching Chooser");
+			// Create intent to show chooser
+			val chooser = Intent.createChooser(intent, /* title */ null)
 
-			val pm = getPackageManager();
+			safeStartActivityAndHide(chooser);
+			return;
+		}
+		
+		safeStartActivityAndHide(intent);
+	}
 
-			val resolveInfos: List<ResolveInfo> = pm.queryIntentActivities(intent, PackageManager.GET_RESOLVED_FILTER);
-
-			Log.i(TAG_MAIN, "ResolveInfos: " + resolveInfos);
-			for (resolveInfo in resolveInfos) {
-				Log.i(TAG_MAIN, "ResolveInfo: " + resolveInfo);
-			}
-
-			if (intent.resolveActivity(pm)?.let {
-				Log.i(TAG_MAIN, "Activity resolved " + it);
-
-				if (it.packageName == "com.cebbinghaus.linkd") {
-					Log.w(TAG_MAIN, "Cyclical intent detected. Ignoring.");
-					return;
-				}
-				intent.component = it;
-				true
-			} != true) {
-				Log.e(TAG_MAIN, "Unable to resolve the activity for the intent.");
-				// Create intent to show chooser
-				val chooser = Intent.createChooser(intent, /* title */ null)
-
-				// Try to invoke the intent.
-				try {
-					startActivity(chooser)
-				} catch (e: ActivityNotFoundException) {
-					// Define what your app should do if no activity can handle the intent.
-				}
-				return;
-			}
-
-			// intent.`package` = "com.mozilla.firefox";
-			// activity.startActivity(intent);
-			// intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-			try {
-				startActivity(intent);
-			} catch (e: ActivityNotFoundException) {
-				Log.e(TAG_MAIN, "Unable to start the activity: " + e);
-			}
-			finish();
+	fun safeStartActivityAndHide(intent: Intent) {
+		try {
+			startActivity(intent);
+			moveTaskToBack(true);
+		} catch (e: ActivityNotFoundException) {
+			Log.e(TAG_MAIN, "Unable to start the activity: " + e);
 		}
 	}
 

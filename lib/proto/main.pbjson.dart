@@ -32,14 +32,16 @@ final $typed_data.Uint8List requestsDescriptor = $convert.base64Decode(
 const History$json = {
   '1': 'History',
   '2': [
-    {'1': 'id', '3': 1, '4': 1, '5': 5, '10': 'id'},
-    {'1': 'name', '3': 2, '4': 1, '5': 9, '10': 'name'},
+    {'1': 'action', '3': 1, '4': 1, '5': 9, '10': 'action'},
+    {'1': 'flags', '3': 2, '4': 1, '5': 5, '10': 'flags'},
+    {'1': 'data', '3': 3, '4': 1, '5': 9, '10': 'data'},
   ],
 };
 
 /// Descriptor for `History`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List historyDescriptor = $convert.base64Decode(
-    'CgdIaXN0b3J5Eg4KAmlkGAEgASgFUgJpZBISCgRuYW1lGAIgASgJUgRuYW1l');
+    'CgdIaXN0b3J5EhYKBmFjdGlvbhgBIAEoCVIGYWN0aW9uEhQKBWZsYWdzGAIgASgFUgVmbGFncx'
+    'ISCgRkYXRhGAMgASgJUgRkYXRh');
 
 @$core.Deprecated('Use historyRequestDescriptor instead')
 const HistoryRequest$json = {

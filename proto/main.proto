@@ -11,8 +11,9 @@ enum Requests {
 
 // The History message definition
 message History {
-	int32 id = 1;
-	string name = 2;
+	string action = 1;
+	int32 flags = 2;
+	string data = 3;
 }
 
 message HistoryRequest {}

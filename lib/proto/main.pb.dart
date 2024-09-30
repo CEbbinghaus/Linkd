@@ -18,15 +18,19 @@ export 'main.pbenum.dart';
 /// The History message definition
 class History extends $pb.GeneratedMessage {
   factory History({
-    $core.int? id,
-    $core.String? name,
+    $core.String? action,
+    $core.int? flags,
+    $core.String? data,
   }) {
     final $result = create();
-    if (id != null) {
-      $result.id = id;
+    if (action != null) {
+      $result.action = action;
     }
-    if (name != null) {
-      $result.name = name;
+    if (flags != null) {
+      $result.flags = flags;
+    }
+    if (data != null) {
+      $result.data = data;
     }
     return $result;
   }
@@ -35,8 +39,9 @@ class History extends $pb.GeneratedMessage {
   factory History.fromJson($core.String i, [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) => create()..mergeFromJson(i, r);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(_omitMessageNames ? '' : 'History', package: const $pb.PackageName(_omitMessageNames ? '' : 'com.cebbinghaus.linkd.proto'), createEmptyInstance: create)
-    ..a<$core.int>(1, _omitFieldNames ? '' : 'id', $pb.PbFieldType.O3)
-    ..aOS(2, _omitFieldNames ? '' : 'name')
+    ..aOS(1, _omitFieldNames ? '' : 'action')
+    ..a<$core.int>(2, _omitFieldNames ? '' : 'flags', $pb.PbFieldType.O3)
+    ..aOS(3, _omitFieldNames ? '' : 'data')
     ..hasRequiredFields = false
   ;
 
@@ -62,22 +67,31 @@ class History extends $pb.GeneratedMessage {
   static History? _defaultInstance;
 
   @$pb.TagNumber(1)
-  $core.int get id => $_getIZ(0);
+  $core.String get action => $_getSZ(0);
   @$pb.TagNumber(1)
-  set id($core.int v) { $_setSignedInt32(0, v); }
+  set action($core.String v) { $_setString(0, v); }
   @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
+  $core.bool hasAction() => $_has(0);
   @$pb.TagNumber(1)
-  void clearId() => clearField(1);
+  void clearAction() => clearField(1);
 
   @$pb.TagNumber(2)
-  $core.String get name => $_getSZ(1);
+  $core.int get flags => $_getIZ(1);
   @$pb.TagNumber(2)
-  set name($core.String v) { $_setString(1, v); }
+  set flags($core.int v) { $_setSignedInt32(1, v); }
   @$pb.TagNumber(2)
-  $core.bool hasName() => $_has(1);
+  $core.bool hasFlags() => $_has(1);
   @$pb.TagNumber(2)
-  void clearName() => clearField(2);
+  void clearFlags() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get data => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set data($core.String v) { $_setString(2, v); }
+  @$pb.TagNumber(3)
+  $core.bool hasData() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearData() => clearField(3);
 }
 
 class HistoryRequest extends $pb.GeneratedMessage {
