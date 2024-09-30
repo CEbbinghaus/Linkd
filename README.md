@@ -8,3 +8,5 @@ An app to manage which links get opened in which app
 * run `adb tcpip 5555` on windows host
 * run `adb connect [phone_ip]:5555` in WSL2
 * profit?
+
+`~/.pub-cache/bin/` needs to be in your path so `protoc-gen-dart` works

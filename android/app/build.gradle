@@ -3,6 +3,23 @@ plugins {
     id "kotlin-android"
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.protobuf"
+}
+
+protobuf {
+    // Configure the protoc executable
+    protoc {
+        // Download from repositories
+        artifact = 'com.google.protobuf:protoc:3.0.0'
+    }
+    generateProtoTasks {
+        all().each { task ->
+            task.builtins {
+                java {
+                }
+            }
+        }
+    }
 }
 
 android {
@@ -13,6 +30,14 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+    }
+
+    sourceSets {
+        main {
+            proto {
+                srcDir '../../proto'
+            }
+        }
     }
 
     kotlinOptions {
@@ -41,4 +66,8 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    implementation "com.google.protobuf:protobuf-java:3.0.0" // Add protobuf dependency
 }

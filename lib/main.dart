@@ -1,71 +1,73 @@
 import 'dart:async';
 
-import 'package:android_intent_plus/android_intent.dart';
+// import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
-import 'package:receive_intent/receive_intent.dart' as IntentLib;
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/services.dart';
+import 'package:linkd/channel.dart';
+import 'package:linkd/proto/main.pb.dart';
+// import 'package:receive_intent/receive_intent.dart' as IntentLib;
+// import 'package:url_launcher/url_launcher.dart';
+// Future<void> ProcessIntent(IntentLib.Intent? intent) async {
+//   if (intent == null || intent.isNull) {
+//     print("Received intent is null or not valid");
+//     return;
+//   }
 
-Future<void> ProcessIntent(IntentLib.Intent? intent) async {
-  if (intent == null || intent.isNull) {
-    print("Received intent is null or not valid");
-    return;
-  }
+//   String? query;
 
-  String? query;
+//   switch (intent.action) {
+//     case "android.intent.action.VIEW":
+//       print("Received VIEW intent");
+//       query = intent.data;
+//       break;
+//     case "android.intent.action.SEND":
+//       print("Received SEND intent");
+//       break;
+//     case "android.intent.action.WEB_SEARCH":
+//       print("Received SEND_MULTIPLE intent");
+//       query = intent.extra?["query"] as String?;
+//       break;
+//     case "android.intent.action.SEARCH":
+//       print("Received SEND_MULTIPLE intent");
+//       break;
+//     default:
+//       print("Received unknown intent: ${intent.action}");
+//       break;
+//   }
 
-  switch (intent.action) {
-    case "android.intent.action.VIEW":
-      print("Received VIEW intent");
-      query = intent.data;
-      break;
-    case "android.intent.action.SEND":
-      print("Received SEND intent");
-      break;
-    case "android.intent.action.WEB_SEARCH":
-      print("Received SEND_MULTIPLE intent");
-      query = intent.extra?["query"] as String?;
-      break;
-    case "android.intent.action.SEARCH":
-      print("Received SEND_MULTIPLE intent");
-      break;
-    default:
-      print("Received unknown intent: ${intent.action}");
-      break;
-  }
+//   if (query == null) {
+//     print("Unable to determine query");
+//     return;
+//   }
 
-  if (query == null) {
-    print("Unable to determine query");
-    return;
-  }
+//   print("Received query: $query");
 
-  print("Received query: $query");
-
-  if (query.startsWith("http")) {
-    final nextIntent = AndroidIntent(
-      action: intent.action,
-      package: 'org.mozilla.firefox',
-      componentName: "org.mozilla.fenix.IntentReceiverActivity",
-      data: query,
-    );
-    await nextIntent.launch();
-  } else if (query.toLowerCase().startsWith("fido:")) {
-    final Uri url = Uri.parse(query);
-    if (!await launchUrl(url)) {
-      throw Exception('Could not launch $url');
-    }
-  }
-}
+//   if (query.startsWith("http")) {
+//     final nextIntent = AndroidIntent(
+//       action: intent.action,
+//       package: 'org.mozilla.firefox',
+//       componentName: "org.mozilla.fenix.IntentReceiverActivity",
+//       data: query,
+//     );
+//     await nextIntent.launch();
+//   } else if (query.toLowerCase().startsWith("fido:")) {
+//     final Uri url = Uri.parse(query);
+//     if (!await launchUrl(url)) {
+//       throw Exception('Could not launch $url');
+//     }
+//   }
+// }
 
 Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // WidgetsFlutterBinding.ensureInitialized();
 
-  print("Starting app");
-  final receivedIntent = await IntentLib.ReceiveIntent.getInitialIntent();
-  ProcessIntent(receivedIntent);
+  // print("Starting app");
+  // final receivedIntent = await IntentLib.ReceiveIntent.getInitialIntent();
+  // ProcessIntent(receivedIntent);
 
-  if (receivedIntent != null && receivedIntent.isNotNull) {
-    print("Started with intent: $receivedIntent");
-  }
+  // if (receivedIntent != null && receivedIntent.isNotNull) {
+  //   print("Started with intent: $receivedIntent");
+  // }
 
   runApp(const MyApp());
 }
@@ -128,20 +130,27 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     super.initState();
-    _sub = IntentLib.ReceiveIntent.receivedIntentStream.listen((intent) {
-      WidgetsFlutterBinding.ensureInitialized();
-      ProcessIntent(intent);
+    
+    load();
+    // _sub = IntentLib.ReceiveIntent.receivedIntentStream.listen((intent) {
+    //   WidgetsFlutterBinding.ensureInitialized();
+    //   ProcessIntent(intent);
 
-      // Validate receivedIntent and warn the user, if it is not correct,
-      if (intent != null && intent.isNotNull) {
-        setState(() {
-          recieved
-              .add(intent.data ?? intent.extra?["query"] as String? ?? "null");
-        });
-      }
-    }, onError: (err) {
-      // Handle exception
-    });
+    //   // Validate receivedIntent and warn the user, if it is not correct,
+    //   if (intent != null && intent.isNotNull) {
+    //     setState(() {
+    //       recieved
+    //           .add(intent.data ?? intent.extra?["query"] as String? ?? "null");
+    //     });
+    //   }
+    // }, onError: (err) {
+    //   // Handle exception
+    // });
+  }
+
+  Future<void> load() async {
+    var result = await Channel.history;
+    print(result);
   }
 
   @override

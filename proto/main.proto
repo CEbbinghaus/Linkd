@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package com.cebbinghaus.linkd.proto;
+
+// const names
+enum Requests {
+	REQUEST_NONE = 0;
+	REQUEST_HISTORY_REQUEST = 1;
+	REQUEST_HISTORY_RESPONSE = 2;
+}
+
+// The History message definition
+message History {
+	int32 id = 1;
+	string name = 2;
+}
+
+message HistoryRequest {}
+
+message HistoryResponse {
+	repeated History history = 1;
+}
